@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cáritas Conecta — Prototipo de Ecosistema</title>
+  <style>
+
+    :root{
+      --bg:#FFFFFF; --card:#FFFFFF; --text:#111827; --muted:#6B7280;
+      --border:#E5E7EB; --shadow:0 10px 30px rgba(17,24,39,.08);
+      --brand:#D9232E; --brand2:#B81C25; --good:#16A34A; --warn:#F59E0B; --link:#2563EB;
+    }
+
+*{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background: var(--bg);
+    }
+    a{color:var(--link); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1180px; margin:0 auto; padding:22px 18px 40px}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:14px; border:1px solid var(--border); border-radius:18px;
+      background:rgba(15,26,46,.7); box-shadow:var(--shadow);
+      position:sticky; top:10px; z-index:10; backdrop-filter: blur(10px);
+    }
+    .brand{display:flex; align-items:center; gap:12px; min-width:220px}
+    .logo{
+      width:40px; height:40px; border-radius:14px; display:grid; place-items:center;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+      box-shadow: 0 8px 18px rgba(214,31,42,.28);
+    }
+    .logo svg{width:22px; height:22px; fill:white; opacity:.95}
+    .brand h1{font-size:14px; margin:0}
+    .brand p{margin:0; font-size:12px; color:var(--muted)}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center}
+    .tab{
+      padding:10px 12px; border-radius:999px; border:1px solid var(--border);
+      background: var(--card); color:var(--text); cursor:pointer; font-size:13px;
+      transition:.15s transform,.15s background,.15s border; display:flex; align-items:center; gap:8px;
+    }
+    .tab:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.18)}
+    .tab.active{background: rgba(214,31,42,.18); border-color: rgba(214,31,42,.55); box-shadow: 0 10px 22px rgba(214,31,42,.18)}
+    .pill{font-size:11px; background:rgba(255,255,255,.08); border:1px solid var(--border); padding:3px 8px; border-radius:999px}
+    .right{display:flex; gap:10px; align-items:center; min-width:220px; justify-content:flex-end}
+    .search{
+      display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px;
+      border:1px solid var(--border); background:rgba(12,21,39,.55); width:min(360px, 42vw);
+    }
+    .search input{flex:1; background:transparent; border:0; outline:0; color:var(--text); font-size:13px}
+    .btn{
+      border:1px solid var(--border); background:rgba(12,21,39,.55); color:var(--text);
+      padding:10px 12px; border-radius:12px; cursor:pointer; font-size:13px;
+      transition:.15s transform,.15s border,.15s background;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.18)}
+    .btn.primary{
+      border-color: rgba(214,31,42,.65);
+      background: linear-gradient(135deg, rgba(214,31,42,.95) 0%, rgba(255,77,87,.92) 100%);
+      box-shadow: 0 12px 22px rgba(214,31,42,.22);
+    }
+    .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px; margin-top:16px}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .right,.brand{min-width:auto} }
+    .card{
+      border:1px solid var(--border); border-radius:18px; background: var(--card);
+      box-shadow: var(--shadow); overflow:hidden;
+    }
+    .card .hd{padding:14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; gap:12px}
+    .card .hd h2{margin:0; font-size:14px}
+    .card .hd p{margin:4px 0 0; font-size:12px; color:var(--muted)}
+    .card .bd{padding:14px}
+    .split{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width:760px){ .split{grid-template-columns:1fr} }
+    .kpis{display:grid; grid-template-columns: repeat(3,1fr); gap:10px}
+    @media (max-width:760px){ .kpis{grid-template-columns:1fr} }
+    .kpi{padding:12px; border-radius:16px; border:1px solid var(--border); background: rgba(12,21,39,.50)}
+    .kpi .v{font-size:18px; font-weight:800}
+    .kpi .l{font-size:12px; color:var(--muted); margin-top:3px}
+    .kpi .t{font-size:11px; margin-top:8px; color:var(--muted)}
+    .bar{height:10px; border-radius:999px; background: rgba(255,255,255,.08); border:1px solid var(--border); overflow:hidden; margin-top:10px}
+    .bar > div{height:100%; width:40%; background: linear-gradient(90deg, var(--brand), var(--brand2)); border-radius:999px}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
+    label{font-size:12px; color:var(--muted)}
+    input, select, textarea{
+      width:100%; padding:10px; border-radius:12px; border:1px solid var(--border);
+      background: rgba(12,21,39,.55); color:var(--text); outline:none; font-size:13px;
+    }
+    textarea{min-height:84px; resize:vertical}
+    .help{margin-top:6px; font-size:11px; color:var(--text); line-height:1.35}
+    .help small{color:var(--muted)}
+    .list{display:flex; flex-direction:column; gap:8px}
+    .item{
+      border:1px solid var(--border); border-radius:14px; background: rgba(12,21,39,.48);
+      padding:10px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+    }
+    .item .meta{min-width:0}
+    .item .meta b{display:block; font-size:13px}
+    .item .meta span{display:block; font-size:12px; color:var(--muted); margin-top:2px}
+    .badge{font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background: rgba(255,255,255,.06); white-space:nowrap}
+    .badge.good{border-color: rgba(74,222,128,.35); background: rgba(74,222,128,.10)}
+    .badge.warn{border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.10)}
+    .badge.brand{border-color: rgba(214,31,42,.45); background: rgba(214,31,42,.12)}
+    .mini{font-size:12px; color:var(--text); line-height:1.5}
+    .divider{height:1px; background: var(--border); margin:12px 0}
+    .hidden{display:none !important}
+    .toast{
+      position:fixed; bottom:14px; right:14px; background: var(--card);
+      border:1px solid var(--border); border-radius:14px; padding:12px; box-shadow: var(--shadow);
+      width:min(420px, 92vw); display:none;
+    }
+    .toast.show{display:block; animation:pop .18s ease-out}
+    @keyframes pop { from{transform: translateY(6px); opacity:0} to{transform: translateY(0); opacity:1} }
+    .toast .t{font-weight:800; font-size:13px}
+    .toast .s{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35}
+    .footer-note{margin-top:14px; font-size:11px; color:var(--muted); line-height:1.45}
+    .chip{display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border-radius:999px; border:1px solid var(--border); background: rgba(12,21,39,.5); font-size:12px}
+    .chip input{width:auto}
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; font-size:11px; padding:3px 6px; border-radius:8px; border:1px solid var(--border); background: rgba(255,255,255,.06)}
+    .social-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width:980px){ .social-grid{grid-template-columns:1fr} }
+    .post{padding:12px; border-radius:16px; border:1px solid var(--border); background: rgba(12,21,39,.48)}
+    .post h3{margin:0 0 6px; font-size:13px}
+    .post p{margin:0; font-size:12px; color:var(--muted); line-height:1.45}
+    .post .meta{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  
+
+    /* --- Mapa interactivo (Impacto por estado) --- */
+.map-wrap{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:12px;
+      align-items:stretch;
+    }
+    @media (max-width:980px){ .map-wrap{grid-template-columns:1fr} }
+    .map-card{
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: #fff;
+      padding:12px;
+    }
+    .map-title{
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      margin-bottom:8px;
+    }
+    .map-title b{font-size:13px}
+    .map-title span{font-size:11px; color:var(--muted)}
+    svg#mxSvg{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(217,35,46,.03), rgba(255,255,255,0));
+      border:1px solid var(--border);
+    }
+    .mx-state{
+      cursor:pointer;
+      stroke: rgba(17,24,39,.12);
+      stroke-width: 1;
+      transition: transform .08s ease, filter .12s ease;
+      transform-origin: center;
+    }
+    .mx-state:hover{filter: drop-shadow(0 10px 14px rgba(17,24,39,.10)); transform: translateY(-1px)}
+    .mx-state.active{stroke: rgba(217,35,46,.65); stroke-width: 2}
+    .mx-label{
+      pointer-events:none;
+      font-size:9px;
+      fill: rgba(17,24,39,.75);
+      font-weight: 700;
+    }
+    .map-detail .big{
+      font-size:18px; font-weight:900; margin-top:6px;
+    }
+    .map-detail .row{
+      display:flex; justify-content:space-between; gap:10px; margin-top:8px;
+      font-size:12px; color:var(--muted);
+    }
+    .map-detail .row b{color:var(--ink)}
+    .progress{
+      height:10px; background: var(--chip); border:1px solid var(--border);
+      border-radius:999px; overflow:hidden; margin-top:10px;
+    }
+    .progress > i{display:block; height:100%; width:40%; background: rgba(217,35,46,.85)}
+    .hint{
+      font-size:11px; color:var(--muted); margin-top:10px; line-height:1.35;
+    }
+
+    
+
+
+    .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(217,35,46,.06);
+      color: var(--text);
+      font-weight:800; font-size:12px;
+    }
+    .progress{height:10px; background: rgba(17,24,39,.06); border-radius:999px; overflow:hidden; border:1px solid var(--border); margin-top:10px}
+    .progress > i{display:block; height:100%; width:0%; background: rgba(217,35,46,.55)}
+
+/* === VISIBILITY FIX: gray backgrounds === */
+.bg-gray, .bg-grey, .card, .panel, .box, .section-gray, .kpi, .tile, .map-panel {
+  color: #000000 !important;
+}
+.bg-gray *, .bg-grey *, .card *, .panel *, .box *, .section-gray *, .kpi *, .tile *, .map-panel * {
+  color: #000000 !important;
+}
+
+</style>
+
+<style>
+:root{
+  --caritas-red:#c4161c;
+  --text-dark:#111;
+  --text-muted:#333;
+  --bg-light:#ffffff;
+  --bg-soft:#f5f5f5;
+}
+body{color:var(--text-dark); background:var(--bg-light);}
+h1,h2,h3,h4,h5{color:var(--text-dark);}
+p,li,span,label{color:var(--text-muted);}
+.card, .panel{background:#fff;}
+.badge, .chip{color:#111;}
+.sat-incentive, .sat-incentive *{color:#000 !important;}
+.footer, .muted{color:#222;}
+/* ensure buttons readable */
+button, .btn{color:#fff;}
+.btn-outline{color:#111;}
+/* map labels */
+.map-legend, .map-info, .map-info *{color:#111;}
+
+/* === VISIBILITY FIX: gray backgrounds === */
+.bg-gray, .bg-grey, .card, .panel, .box, .section-gray, .kpi, .tile, .map-panel {
+  color: #000000 !important;
+}
+.bg-gray *, .bg-grey *, .card *, .panel *, .box *, .section-gray *, .kpi *, .tile *, .map-panel * {
+  color: #000000 !important;
+}
+
+</style>
+
+
+<style>
+.map-tile{cursor:pointer; transition:transform .1s ease, box-shadow .1s ease;}
+.map-tile.hover{transform:translateY(-1px); box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.map-tile.active{outline:2px solid var(--caritas-red); box-shadow:0 3px 10px rgba(0,0,0,.18);}
+
+/* === VISIBILITY FIX: gray backgrounds === */
+.bg-gray, .bg-grey, .card, .panel, .box, .section-gray, .kpi, .tile, .map-panel {
+  color: #000000 !important;
+}
+.bg-gray *, .bg-grey *, .card *, .panel *, .box *, .section-gray *, .kpi *, .tile *, .map-panel * {
+  color: #000000 !important;
+}
+
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true" title="Prototipo">
+        <svg viewBox="0 0 24 24"><path d="M12 2c1.6 0 2.9 1.3 2.9 2.9V7h2.1c1.6 0 2.9 1.3 2.9 2.9v4.2c0 1.6-1.3 2.9-2.9 2.9h-2.1v2.1c0 1.6-1.3 2.9-2.9 2.9H7.8c-1.6 0-2.9-1.3-2.9-2.9V17H2.8c-1.6 0-2.8-1.3-2.8-2.9V9.9C0 8.3 1.3 7 2.9 7h2V4.9C4.9 3.3 6.2 2 7.8 2H12z"/></svg>
+      </div>
+      <div>
+        <h1>Cáritas Conecta — Ecosistema Digital (Prototipo)</h1>
+        <p>CRM + Donación unificada + Red de comunicación nacional</p>
+      </div>
+    </div>
+
+    <nav class="tabs" aria-label="Secciones">
+      <button class="tab active" data-view="inicio">Inicio <span class="pill">Impacto</span></button>
+      <button class="tab" data-view="donar">Donar Claro <span class="pill">1‑click</span></button>
+      <button class="tab" data-view="crm">Cáritas Conecta <span class="pill">CRM</span></button>
+      <button class="tab" data-view="social">Red Cáritas Nacional <span class="pill">RRSS</span></button>
+    </nav>
+
+    <div class="right">
+      <div class="search" title="Busca donantes / campañas (demo)">
+        <span class="kbd">⌘K</span>
+        <input id="globalSearch" placeholder="Buscar… (demo)" />
+      </div>
+      <button class="btn primary" id="quickDonateBtn">Donar ahora</button>
+    </div>
+  </header>
+
+  <!-- INICIO -->
+  <section id="view-inicio" class="view">
+    <div class="grid">
+      <article class="card">
+        <div class="hd">
+          <div>
+            <h2>¿Qué es este ecosistema?</h2>
+            <p>Una experiencia única para donar, dar seguimiento y fortalecer la confianza.</p>
+          </div>
+          <span class="badge brand">Prototipo interactivo</span>
+        </div>
+        <div class="bd">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="v" id="kpiTotal">$1,290,900</div>
+              <div class="l">Donaciones (demo)</div>
+              <div class="t">Objetivo $1,750,000</div>
+              <div class="bar"><div id="kpiBar"></div></div>
+            </div>
+            <div class="kpi">
+              <div class="v" id="kpiDonantes">2,764</div>
+              <div class="l">Donantes activos</div>
+              <div class="t">Recurrencia <span id="kpiRec">32%</span></div>
+            </div>
+            <div class="kpi">
+              <div class="v" id="kpiBenef">5,985</div>
+              <div class="l">Beneficiarios asistidos</div>
+              <div class="t">Despensas · Salud · Educación</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="split">
+            <div>
+              <h2 style="margin:0 0 6px;font-size:14px">La idea en una frase</h2>
+              <p class="mini">
+                Unificamos <b>donación</b>, <b>seguimiento</b> y <b>comunicación</b> para que cada apoyo sea
+                <b>simple</b>, <b>confiable</b> y <b>medible</b>, fortaleciendo rendición de cuentas e impacto social.
+              </p>
+              <div class="divider"></div>
+              <div class="row">
+                <span class="chip">✅ Donación rápida y segura</span>
+                <span class="chip">✅ Transparencia y trazabilidad</span>
+                <span class="chip">✅ Coordinación nacional en RRSS</span>
+              </div>
+            </div>
+            <div>
+              <h2 style="margin:0 0 6px;font-size:14px">¿Qué cambia?</h2>
+              <div class="list" id="inicioHighlights"></div>
+            </div>
+          </div>
+
+          
+          <div class="divider"></div>
+          <div class="map-wrap" aria-label="Mapa de impacto por estado">
+            <div class="map-card">
+              <div class="map-title">
+                <b>Mapa de impacto por estado</b>
+                <span>Selecciona un estado para ver trazabilidad</span>
+              </div>
+              <svg id="mxSvg" viewBox="0 0 520 360" role="img" aria-label="Mapa interactivo de México"></svg>
+              <div class="hint">El color indica nivel relativo de donaciones (más oscuro = más donación). Mapa estilizado para prototipar interacción.</div>
+            </div>
+
+            <div class="map-card map-detail">
+              <div class="tag" id="md_state">Selecciona un estado</div>
+              <div class="big" id="md_total">—</div>
+              <div class="row"><span>Beneficiarios</span><b id="md_benef">—</b></div>
+              <div class="row"><span>Programas activos</span><b id="md_programs">—</b></div>
+              <div class="row"><span>Última actualización</span><b id="md_last">—</b></div>
+              <div class="progress" aria-hidden="true"><i id="md_bar"></i></div>
+              <div class="divider"></div>
+              <div class="mini" id="md_trace">Selecciona un estado para ver trazabilidad: causa principal, último donativo y evidencia.</div>
+            </div>
+          </div>
+
+
+          <p class="footer-note">
+            Nota: Esto es un prototipo para visualizar la experiencia. No procesa pagos reales.
+            La deducibilidad fiscal puede aplicar según requisitos y comprobantes vigentes.
+          </p>
+        </div>
+      </article>
+
+      <aside class="card">
+        <div class="hd">
+          <div>
+            <h2>Campaña activa (demo)</h2>
+            <p>Selecciona dónde quieres que tu donación impacte.</p>
+          </div>
+          <span class="badge good">En progreso</span>
+        </div>
+        <div class="bd">
+          <div class="field">
+            <label>Estado destino</label>
+            <select id="quickState"></select>
+          </div>
+          <div class="field">
+            <label>Monto</label>
+            <select id="quickAmount">
+              <option value="200">$200</option>
+              <option value="500">$500</option>
+              <option value="1000" selected>$1,000</option>
+              <option value="2000">$2,000</option>
+              <option value="custom">Otro…</option>
+            </select>
+            <input id="quickCustom" class="hidden" placeholder="Escribe el monto (MXN)" inputmode="numeric" />
+            <div class="help">Tip: En donación mensual, tu impacto se vuelve constante.</div>
+          </div>
+          <div class="row" style="align-items:center; justify-content:space-between; margin-top:6px">
+            <span class="chip"><input id="quickRecurring" type="checkbox" /> Donar cada mes</span>
+            <button class="btn primary" id="quickDonateNow">Continuar</button>
+          </div>
+          <div class="divider"></div>
+          <div class="mini"><b>Transparencia:</b> tu donación se registra y puedes ver avances en el tiempo <span style="opacity:.7">(demo)</span>.</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- DONAR -->
+  <section id="view-donar" class="view hidden">
+    <div class="grid">
+      <article class="card">
+        <div class="hd">
+          <div>
+            <h2>Donar Claro — Plataforma única de donación</h2>
+            <p>Menos fricción, más confianza: elige estado, monto y recurrencia en minutos.</p>
+          </div>
+          <span class="badge brand">Compromiso Continuo</span>
+        </div>
+        <div class="bd">
+          <div class="split">
+            <div>
+              <h2 style="margin:0 0 8px;font-size:14px">Datos del donante</h2>
+              <div class="field"><label>Nombre completo</label><input id="donorName" placeholder="Ej. María García" /></div>
+              <div class="field"><label>Correo</label><input id="donorEmail" type="email" placeholder="maria@email.com" /></div>
+              <div class="row">
+                <div class="field" style="flex:1; min-width:170px"><label>Teléfono (opcional)</label><input id="donorPhone" placeholder="10 dígitos" inputmode="tel" /></div>
+                <div class="field" style="flex:1; min-width:170px"><label>RFC (opcional para recibo)</label><input id="donorRFC" placeholder="AAAA000000AAA" /></div>
+              </div>
+              <div class="field"><label>Mensaje (opcional)</label><textarea id="donorMsg" placeholder="Ej. Para apoyo alimentario y salud"></textarea></div>
+              <div class="help">
+                <b>Incentivo fiscal (SAT):</b> tu donación <i>podría</i> ser deducible si se emite el comprobante y cumples requisitos.
+                <small>Este prototipo solo muestra la experiencia.</small>
+              </div>
+            </div>
+
+            <div>
+              <h2 style="margin:0 0 8px;font-size:14px">Tu donación</h2>
+              <div class="row">
+                <div class="field" style="flex:1; min-width:180px"><label>Estado destino</label><select id="donState"></select></div>
+                <div class="field" style="flex:1; min-width:180px"><label>Causa principal</label>
+                  <select id="donCause">
+                    <option value="Despensas">Despensas</option>
+                    <option value="Salud">Salud</option>
+                    <option value="Educación">Educación</option>
+                    <option value="Emergencias">Emergencias</option>
+                    <option value="Donde más se necesite" selected>Donde más se necesite</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="field" style="flex:1; min-width:180px"><label>Monto (MXN)</label><input id="donAmount" value="1000" inputmode="numeric" /></div>
+                <div class="field" style="flex:1; min-width:180px"><label>Tipo</label>
+                  <select id="donType">
+                    <option value="una_vez">Una vez</option>
+                    <option value="mensual" selected>Mensual (suscripción)</option>
+                    <option value="trimestral">Trimestral</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <h2 style="margin:0 0 8px;font-size:14px">Pago (demo)</h2>
+              <div class="row">
+                <span class="chip"><input type="radio" name="pay" value="credito" checked /> Crédito</span>
+                <span class="chip"><input type="radio" name="pay" value="debito" /> Débito</span>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <div class="field" style="flex:1; min-width:180px"><label>Número de tarjeta</label><input id="cardNum" placeholder="•••• •••• •••• ••••" inputmode="numeric" /></div>
+                <div class="field" style="width:120px"><label>Vence</label><input id="cardExp" placeholder="MM/AA" /></div>
+                <div class="field" style="width:120px"><label>CVV</label><input id="cardCvv" placeholder="•••" inputmode="numeric" /></div>
+              </div>
+              <div class="row" style="align-items:center; justify-content:space-between; margin-top:6px">
+                <span class="badge good" id="donSummary">Resumen: $1,000 · Mensual</span>
+                <button class="btn primary" id="donSubmit">Confirmar donación</button>
+              </div>
+              <p class="footer-note">En producción, aquí se integraría pasarela de pagos + emisión automática de recibo.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="card">
+        <div class="hd">
+          <div><h2>Seguimiento del impacto (demo)</h2><p>Se alimenta del CRM para transparencia.</p></div>
+          <span class="badge">Transparencia</span>
+        </div>
+        <div class="bd">
+          <div class="list" id="impactFeed"></div>
+          <div class="divider"></div>
+          <div class="mini"><b>Promesa:</b> “Tu apoyo llegó aquí y cambió esto”.</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CRM -->
+  <section id="view-crm" class="view hidden">
+    <div class="grid">
+      <article class="card">
+        <div class="hd">
+          <div><h2>Cáritas Conecta — CRM centralizado</h2><p>Centraliza donantes, beneficiarios y campañas para decidir con evidencia.</p></div>
+          <button class="btn" id="addDonorBtn">+ Agregar registro</button>
+        </div>
+        <div class="bd">
+          <div class="kpis">
+            <div class="kpi"><div class="v" id="crmDonKpi">2,764</div><div class="l">Donantes activos</div><div class="t">Nuevos 30d <span id="crmNewKpi">+124</span></div></div>
+            <div class="kpi"><div class="v" id="crmRecKpi">32%</div><div class="l">Tasa de recurrencia</div><div class="t">Meta 40%</div></div>
+            <div class="kpi"><div class="v" id="crmAlertsKpi">18</div><div class="l">Alertas por seguimiento</div><div class="t"><span class="badge warn">Prioridad</span></div></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="split">
+            <div>
+              <h2 style="margin:0 0 8px;font-size:14px">Donantes recientes</h2>
+              <div class="list" id="donorList"></div>
+            </div>
+            <div>
+              <h2 style="margin:0 0 8px;font-size:14px">Historial / Actividad</h2>
+              <div class="list" id="activityList"></div>
+              <div class="divider"></div>
+              <h2 style="margin:0 0 8px;font-size:14px">Distribución del impacto (demo)</h2>
+              <div class="kpi" style="padding:12px">
+                <div class="mini">Despensas (45%)</div><div class="bar"><div style="width:45%"></div></div>
+                <div class="mini" style="margin-top:10px">Salud (25%)</div><div class="bar"><div style="width:25%"></div></div>
+                <div class="mini" style="margin-top:10px">Educación (15%)</div><div class="bar"><div style="width:15%"></div></div>
+                <div class="mini" style="margin-top:10px">Social (15%)</div><div class="bar"><div style="width:15%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <p class="footer-note">En una implementación real: roles, protección de datos personales, auditoría y trazabilidad por sede.</p>
+        </div>
+      </article>
+
+      <aside class="card">
+        <div class="hd">
+          <div><h2>Transparencia en un vistazo</h2><p>Lo que un donante vería (demo).</p></div>
+          <span class="badge good">Confianza</span>
+        </div>
+        <div class="bd">
+          <div class="mini"><b>Recibo y seguimiento:</b> historial, causa, estado destino y reportes.</div>
+          <div class="divider"></div>
+          <div class="list" id="donorReceipts"></div>
+          <div class="divider"></div>
+          <button class="btn primary" id="goDonateFromCRM">Ir a donar</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- SOCIAL -->
+  <section id="view-social" class="view hidden">
+    <div class="grid">
+      <article class="card">
+        <div class="hd">
+          <div><h2>Red Cáritas Nacional — Comunicación y RRSS</h2><p>Protocolos, campañas y narrativa común para fortalecer visibilidad y confianza.</p></div>
+          <span class="badge brand">Coherencia</span>
+        </div>
+        <div class="bd">
+          <div class="social-grid">
+            <div class="post">
+              <h3>Protocolos nacionales (demo)</h3>
+              <p>Lineamientos para tono, mensajes clave, transparencia y respuesta ante crisis: una sola voz, con identidad local.</p>
+              <div class="meta">
+                <span class="badge">Plantillas</span><span class="badge">Calendario</span><span class="badge">Crisis</span>
+                <button class="btn" id="downloadKit">Descargar kit (demo)</button>
+              </div>
+            </div>
+            <div class="post">
+              <h3>Campañas nacionales (demo)</h3>
+              <p>Publicaciones estandarizadas que conectan historias reales con llamados claros a donar, voluntariar y compartir (con link a Donar Claro).</p>
+              <div class="meta"><span class="badge good">+ Alcance</span><span class="badge good">+ Confianza</span><span class="badge">Tracking</span></div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="split">
+            <div>
+              <h2 style="margin:0 0 8px;font-size:14px">Programador de publicaciones (demo)</h2>
+              <div class="field"><label>Red</label>
+                <select id="socialNet"><option>Facebook</option><option>Instagram</option><option>X</option><option>TikTok</option></select>
+              </div>
+              <div class="field"><label>Objetivo</label>
+                <select id="socialGoal"><option value="donar">Donar (link a Donar Claro)</option><option value="voluntariado">Voluntariado</option><option value="transparencia">Transparencia / Reporte</option></select>
+              </div>
+              <div class="field"><label>Mensaje</label><textarea id="socialCopy" placeholder="Escribe un mensaje breve, humano y claro…"></textarea></div>
+              <div class="row"><button class="btn primary" id="schedulePost">Programar (demo)</button><button class="btn" id="useTemplate">Usar plantilla</button></div>
+              <p class="footer-note">Tip: historia + dato de impacto + llamado claro + link rastreable.</p>
+            </div>
+            <div>
+              <h2 style="margin:0 0 8px;font-size:14px">Feed de campañas (demo)</h2>
+              <div class="list" id="campaignFeed"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="card">
+        <div class="hd">
+          <div><h2>Cómo se conecta todo</h2><p>RRSS → Donación → CRM → Reporte → Confianza</p></div>
+          <span class="badge">Ecosistema</span>
+        </div>
+        <div class="bd">
+          <div class="list">
+            <div class="item"><div class="meta"><b>1) RRSS estandarizadas</b><span>Mensajes coherentes con evidencia de impacto.</span></div><span class="badge">Atracción</span></div>
+            <div class="item"><div class="meta"><b>2) Donación simple</b><span>Menos pasos, más conversión y recurrencia.</span></div><span class="badge good">Conversión</span></div>
+            <div class="item"><div class="meta"><b>3) Registro en CRM</b><span>Trazabilidad, seguimiento y decisiones con datos.</span></div><span class="badge brand">Transparencia</span></div>
+            <div class="item"><div class="meta"><b>4) Reporte al donante</b><span>“Tu apoyo llegó aquí y cambió esto”.</span></div><span class="badge good">Retención</span></div>
+          </div>
+          <div class="divider"></div>
+          <button class="btn primary" id="ctaFromSocial">Crear campaña + donar</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="t" id="toastTitle">Listo</div>
+    <div class="s" id="toastMsg">Acción completada (demo).</div>
+  </div>
+</div>
+
+<script>
+  const MX_STATES=["Aguascalientes","Baja California","Baja California Sur","Campeche","Chiapas","Chihuahua","Coahuila","Colima","Durango","Estado de México","Guanajuato","Guerrero","Hidalgo","Jalisco","Michoacán","Morelos","Nayarit","Nuevo León","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí","Sinaloa","Sonora","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas","Ciudad de México"];
+  const db={
+    total:1290900, goal:1750000, donorsActive:2764, recurringRate:.32, beneficiaries:5985,
+    donors:[
+      {name:"María García",status:"Activo",amount:200,type:"Mensual",state:"Puebla",cause:"Donde más se necesite"},
+      {name:"Pedro Ramírez",status:"Activo",amount:100,type:"Una vez",state:"Ciudad de México",cause:"Salud"},
+      {name:"Laura Mendoza",status:"Inactivo",amount:2500,type:"Trimestral",state:"Jalisco",cause:"Educación"},
+    ],
+    activity:[
+      {tag:"Donación",text:"Nueva donación mensual registrada",meta:"Puebla · $200 · hace 2h"},
+      {tag:"Reporte",text:"Reporte de impacto enviado a donantes",meta:"Semana 4 · automático"},
+      {tag:"Alerta",text:"Dato incompleto en registro",meta:"RFC faltante · revisar"},
+    ],
+    impactFeed:[
+      {title:"Despensas entregadas",desc:"120 paquetes alimentarios en Chiapas.",tag:"Impacto"},
+      {title:"Brigada de salud",desc:"Atención a 85 personas en Oaxaca.",tag:"Impacto"},
+      {title:"Apoyo educativo",desc:"50 kits escolares distribuidos en Puebla.",tag:"Impacto"},
+    ],
+    receipts:[
+      {who:"María García",line:"Puebla · Mensual · $200",tag:"Recibo"},
+      {who:"Pedro Ramírez",line:"CDMX · Una vez · $100",tag:"Recibo"},
+    ],
+    campaigns:[
+      {title:"#SolidaridadEnAcción",desc:"Historias + link directo a Donar Claro.",tag:"Campaña"},
+      {title:"#AyudaEmergencia",desc:"Actualización transparente del uso de recursos.",tag:"Transparencia"},
+    ]
+  };
+
+  const $=(s)=>document.querySelector(s);
+  const $$=(s)=>Array.from(document.querySelectorAll(s));
+
+  function money(n){
+    try{return n.toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});}
+    catch{return "$"+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+  }
+  function toast(t,m){
+    $("#toastTitle").textContent=t; $("#toastMsg").textContent=m;
+    const el=$("#toast"); el.classList.add("show");
+    clearTimeout(window.__tt); window.__tt=setTimeout(()=>el.classList.remove("show"),2600);
+  }
+  function setView(v){
+    $$(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+    $$(".view").forEach(x=>x.classList.add("hidden"));
+    $("#view-"+v).classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function fillStates(id,preferred){
+    const sel=$(id); sel.innerHTML="";
+    MX_STATES.forEach(st=>{const o=document.createElement("option"); o.value=st; o.textContent=st; sel.appendChild(o);});
+    sel.value=preferred||"Puebla";
+  }
+  function renderKPIs(){
+    $("#kpiTotal").textContent=money(db.total);
+    $("#kpiDonantes").textContent=db.donorsActive.toLocaleString("es-MX");
+    $("#kpiRec").textContent=Math.round(db.recurringRate*100)+"%";
+    $("#kpiBenef").textContent=db.beneficiaries.toLocaleString("es-MX");
+    const pct=Math.max(0,Math.min(1,db.total/db.goal));
+    $("#kpiBar").style.width=Math.round(pct*100)+"%";
+  }
+  function renderInicioHighlights(){
+    const items=[
+      {b:"Del apoyo aislado al compromiso continuo",s:"Suscripción y comunicación para retener donantes.",tag:"Retención"},
+      {b:"Trazabilidad institucional",s:"Registro centralizado para transparencia y decisiones.",tag:"CRM"},
+      {b:"Narrativa nacional con identidad local",s:"Protocolos RRSS para coherencia y confianza.",tag:"RRSS"},
+    ];
+    const w=$("#inicioHighlights"); w.innerHTML="";
+    items.forEach(i=>{
+      const d=document.createElement("div"); d.className="item";
+      d.innerHTML=`<div class="meta"><b>${i.b}</b><span>${i.s}</span></div><span class="badge">${i.tag}</span>`;
+      w.appendChild(d);
+    });
+  }
+  function renderImpactFeed(){
+    const w=$("#impactFeed"); w.innerHTML="";
+    db.impactFeed.slice(0,6).forEach(x=>{
+      const d=document.createElement("div"); d.className="item";
+      d.innerHTML=`<div class="meta"><b>${x.title}</b><span>${x.desc}</span></div><span class="badge good">${x.tag}</span>`;
+      w.appendChild(d);
+    });
+  }
+  function renderCRM(){
+    $("#crmDonKpi").textContent=db.donorsActive.toLocaleString("es-MX");
+    $("#crmRecKpi").textContent=Math.round(db.recurringRate*100)+"%";
+    $("#crmAlertsKpi").textContent="18";
+    const dl=$("#donorList"); dl.innerHTML="";
+    db.donors.slice(0,7).forEach(d=>{
+      const cls=d.status==="Activo"?"good":"warn";
+      const el=document.createElement("div"); el.className="item";
+      el.innerHTML=`<div class="meta"><b>${d.name}</b><span>${d.state} · ${d.type} · ${money(d.amount)} · ${d.cause}</span></div><span class="badge ${cls}">${d.status}</span>`;
+      dl.appendChild(el);
+    });
+    const al=$("#activityList"); al.innerHTML="";
+    db.activity.slice(0,8).forEach(a=>{
+      const cls=a.tag==="Alerta"?"warn":(a.tag==="Donación"?"good":"");
+      const el=document.createElement("div"); el.className="item";
+      el.innerHTML=`<div class="meta"><b>${a.text}</b><span>${a.meta}</span></div><span class="badge ${cls}">${a.tag}</span>`;
+      al.appendChild(el);
+    });
+    const rl=$("#donorReceipts"); rl.innerHTML="";
+    db.receipts.slice(0,6).forEach(r=>{
+      const el=document.createElement("div"); el.className="item";
+      el.innerHTML=`<div class="meta"><b>${r.who}</b><span>${r.line}</span></div><span class="badge">${r.tag}</span>`;
+      rl.appendChild(el);
+    });
+  }
+  function renderSocial(){
+    const w=$("#campaignFeed"); w.innerHTML="";
+    db.campaigns.forEach(c=>{
+      const el=document.createElement("div"); el.className="item";
+      el.innerHTML=`<div class="meta"><b>${c.title}</b><span>${c.desc}</span></div><span class="badge">${c.tag}</span>`;
+      w.appendChild(el);
+    });
+  }
+  function updateDonSummary(){
+    const amt=parseFloat($("#donAmount").value||"0")||0;
+    const t=$("#donType").value;
+    const lbl=t==="una_vez"?"Una vez":(t==="mensual"?"Mensual":"Trimestral");
+    $("#donSummary").textContent=`Resumen: ${money(amt)} · ${lbl}`;
+  }
+  function addDonationToDB({name,state,cause,amount,type}){
+    db.total+=amount;
+    if(name && !db.donors.some(d=>d.name.toLowerCase()===name.toLowerCase())) db.donorsActive+=1;
+    db.donors.unshift({name:name||"Donante",status:"Activo",amount,type:(type==="mensual"?"Mensual":type==="trimestral"?"Trimestral":"Una vez"),state,cause});
+    if(type!=="una_vez") db.recurringRate=Math.min(.65, db.recurringRate+.003);
+    db.activity.unshift({tag:"Donación",text:"Donación registrada en plataforma unificada",meta:`${state} · ${money(amount)} · justo ahora`});
+    db.receipts.unshift({who:name||"Donante",line:`${state} · ${type==="mensual"?"Mensual":type==="trimestral"?"Trimestral":"Una vez"} · ${money(amount)}`,tag:"Recibo"});
+    db.impactFeed.unshift({title:"Donación recibida",desc:`Gracias. Tu apoyo se asignó a ${cause} en ${state}.`,tag:"Registro"});
+    // Actualiza trazabilidad por estado (demo)
+    if(stateData && stateData[state]){
+      stateData[state].total += amount;
+      stateData[state].benef += Math.max(1, Math.round(amount/9));
+      stateData[state].programs = Math.min(9, stateData[state].programs + (amount>=1000?1:0));
+      stateData[state].last = "Hoy";
+      stateData[state].lastDonation = money(amount);
+      stateData[state].mainCause = cause;
+      stateData[state].evidence = (type!=="una_vez" ? "Reporte mensual" : "Foto de entrega");
+      selectedState = state;
+      renderMap();
+      selectStateOnMap(state);
+    }
+  }
+  function openDonationWithPref(state,amount,recurring){
+    setView("donar");
+    if(state) $("#donState").value=state;
+    if(amount) $("#donAmount").value=String(amount);
+    if(recurring) $("#donType").value="mensual";
+    updateDonSummary();
+    toast("Listo","Completa tus datos para confirmar la donación (demo).");
+  }
+  function runSearch(q){
+    q=(q||"").trim().toLowerCase();
+    if(!q){toast("Búsqueda","Escribe algo para buscar (demo)."); return;}
+    const donorHit=db.donors.find(d=>d.name.toLowerCase().includes(q)||d.state.toLowerCase().includes(q));
+    const campHit=db.campaigns.find(c=>c.title.toLowerCase().includes(q)||c.desc.toLowerCase().includes(q));
+    if(donorHit){setView("crm"); toast("Resultado",`Donante: ${donorHit.name} · ${donorHit.state} · ${money(donorHit.amount)}`); return;}
+    if(campHit){setView("social"); toast("Resultado",`Campaña: ${campHit.title}`); return;}
+    toast("Sin resultados","Prueba con un nombre (María) o estado (Puebla).");
+  }
+
+  
+  // ---------- Datos por estado (para trazabilidad) ----------
+  // Se inicializa con valores demo y se actualiza cuando se registra una donación.
+  const stateData = {};
+  function seedStateData(){
+    // Distribución demo determinística: asigna pesos por estado para que siempre se vea igual.
+    const weights = {};
+    MX_STATES.forEach(st=>{
+      const h = Array.from(st).reduce((a,c)=>a + c.charCodeAt(0), 0);
+      const w = 0.6 + ((h % 97) / 97) * 1.9; // 0.6..2.5
+      weights[st]=w;
+    });
+    const sumW = Object.values(weights).reduce((a,b)=>a+b,0);
+    const total = db.total;
+    MX_STATES.forEach(st=>{
+      const base = Math.round((weights[st]/sumW)*total);
+      stateData[st]={
+        total: base,
+        benef: Math.max(120, Math.round(base/9)),      // demo: $9 ≈ 1 beneficiario
+        programs: 3 + (base % 5),
+        last: "Hoy",
+        mainCause: (["Alimentación","Salud","Vivienda","Educación","Emergencias"][ (st.length + base) % 5 ]),
+        lastDonation: money(Math.max(200, Math.round(base/20))),
+        evidence: (["Foto de entrega","Acta de distribución","Reporte mensual","Testimonio","Bitácora"][ (base + st.length) % 5 ])
+      };
+    });
+  }
+
+  // ---------- Mapa de México (cartograma) ----------
+  const MAP_LAYOUT = [
+    ["Baja California", 0, 0], ["Baja California Sur", 0, 1],
+    ["Sonora", 1, 1], ["Chihuahua", 2, 1], ["Coahuila", 3, 1], ["Nuevo León", 4, 1], ["Tamaulipas", 5, 1],
+    ["Sinaloa", 1, 2], ["Durango", 2, 2], ["Zacatecas", 3, 2], ["San Luis Potosí", 4, 2], ["Veracruz", 5, 2],
+    ["Nayarit", 1, 3], ["Jalisco", 2, 3], ["Aguascalientes", 3, 3], ["Guanajuato", 4, 3], ["Hidalgo", 5, 3], ["Puebla", 6, 3],
+    ["Colima", 1, 4], ["Michoacán", 2, 4], ["Querétaro", 4, 4], ["Estado de México", 5, 4], ["Tlaxcala", 6, 4], ["Ciudad de México", 5, 5],
+    ["Guerrero", 2, 5], ["Morelos", 5, 6], ["Oaxaca", 3, 6], ["Chiapas", 4, 6],
+    ["Tabasco", 5, 6], ["Campeche", 6, 6], ["Yucatán", 7, 6], ["Quintana Roo", 8, 6],
+  ];
+
+  let selectedState = "Puebla";
+
+  function colorScale(v, vmin, vmax){
+    const t = (v - vmin) / (vmax - vmin + 1e-9);
+    const a = 0.10 + t * 0.55;
+    return `rgba(217,35,46,${a.toFixed(3)})`;
+  }
+
+  function renderMap(){
+    const svg = document.getElementById("mxSvg");
+    if(!svg) return;
+
+    svg.innerHTML = "";
+    const totalsArr = Object.values(stateData).map(x=>x.total);
+    const vmin = Math.min(...totalsArr);
+    const vmax = Math.max(...totalsArr);
+
+    const HEX_W = 56, HEX_H = 48;
+    const PADX = 22, PADY = 22;
+
+    function hexPath(cx, cy){
+      const r = 22;
+      const pts = [];
+      for(let i=0;i<6;i++){
+        const ang = Math.PI/3*i + Math.PI/6;
+        pts.push([cx + r*Math.cos(ang), cy + r*Math.sin(ang)]);
+      }
+      return "M" + pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join("L") + "Z";
+    }
+
+    MAP_LAYOUT.forEach(([st, c, r])=>{
+      if(!stateData[st]) return;
+
+      const cx = PADX + c*HEX_W + (r%2 ? HEX_W/2 : 0);
+      const cy = PADY + r*HEX_H*0.85;
+      const fill = colorScale(stateData[st].total, vmin, vmax);
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d", hexPath(cx, cy));
+      path.setAttribute("fill", fill);
+      path.setAttribute("class", "mx-state" + (selectedState===st ? " active" : ""));
+      path.setAttribute("data-state", st);
+      path.setAttribute("role","button");
+      path.setAttribute("tabindex","0");
+      path.setAttribute("aria-label", st);
+      svg.appendChild(path);
+
+      const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+      label.setAttribute("x", cx);
+      label.setAttribute("y", cy+3);
+      label.setAttribute("text-anchor","middle");
+      label.setAttribute("class","mx-label");
+      label.textContent = st.split(" ").map(w=>w[0]).join("");
+      svg.appendChild(label);
+    });
+
+    svg.addEventListener("click",(e)=>{
+      const node = e.target.closest(".mx-state");
+      if(!node) return;
+      const st = node.getAttribute("data-state");
+      selectStateOnMap(st);
+    });
+
+    svg.addEventListener("keydown",(e)=>{
+      const node = e.target.closest(".mx-state");
+      if(!node) return;
+      if(e.key==="Enter" || e.key===" "){
+        e.preventDefault();
+        const st = node.getAttribute("data-state");
+        selectStateOnMap(st);
+      }
+    });
+  }
+
+  function selectStateOnMap(st){
+    selectedState = st;
+    renderMap();
+
+    const d = stateData[st];
+    if(!d) return;
+
+    document.getElementById("md_state").textContent = st;
+    document.getElementById("md_total").textContent = money(d.total);
+    document.getElementById("md_benef").textContent = d.benef.toLocaleString("es-MX");
+    document.getElementById("md_programs").textContent = d.programs.toString();
+    document.getElementById("md_last").textContent = d.last;
+
+    const vmax = Math.max(...Object.values(stateData).map(x=>x.total));
+    const pct = Math.max(6, Math.round((d.total / vmax) * 100));
+    document.getElementById("md_bar").style.width = pct + "%";
+
+    document.getElementById("md_trace").innerHTML =
+      `<b>Trazabilidad:</b> causa principal <b>${d.mainCause}</b> • último donativo <b>${d.lastDonation}</b> • evidencia: <b>${d.evidence}</b>.`;
+
+    // sincroniza el selector rápido y el formulario de donación
+    const qs = document.getElementById("quickState");
+    if(qs && qs.value !== st) qs.value = st;
+    const ds = document.getElementById("donState");
+    if(ds && ds.value !== st) ds.value = st;
+  }
+
+
+  // Init
+  fillStates("#quickState","Puebla"); fillStates("#donState","Puebla");
+  renderKPIs(); renderInicioHighlights(); renderImpactFeed(); renderCRM(); renderSocial();
+  seedStateData();
+  renderMap();
+  selectStateOnMap(selectedState); updateDonSummary();
+
+  // Tabs
+  $$(".tab").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
+
+  $("#quickDonateBtn").addEventListener("click",()=>setView("donar"));
+  $("#quickAmount").addEventListener("change",(e)=>{
+    const v=e.target.value; $("#quickCustom").classList.toggle("hidden", v!=="custom");
+    if(v!=="custom") $("#quickCustom").value="";
+  });
+  $("#quickDonateNow").addEventListener("click",()=>{
+    const st=$("#quickState").value;
+    let amt=$("#quickAmount").value==="custom"?parseFloat($("#quickCustom").value||"0"):parseFloat($("#quickAmount").value);
+    amt=isFinite(amt)?amt:0;
+    if(amt<=0){toast("Monto inválido","Escribe un monto mayor a $0."); return;}
+    openDonationWithPref(st,amt,$("#quickRecurring").checked);
+  });
+
+  $("#donAmount").addEventListener("input",updateDonSummary);
+  $("#donType").addEventListener("change",updateDonSummary);
+
+  $("#donSubmit").addEventListener("click",()=>{
+    const name=$("#donorName").value.trim();
+    const email=$("#donorEmail").value.trim();
+    const state=$("#donState").value;
+    const cause=$("#donCause").value;
+    const amount=parseFloat($("#donAmount").value||"0");
+    const type=$("#donType").value;
+
+    if(!name||!email){toast("Faltan datos","Nombre y correo son requeridos (demo)."); return;}
+    if(!isFinite(amount)||amount<=0){toast("Monto inválido","Ingresa un monto válido > $0."); return;}
+
+    addDonationToDB({name,state,cause,amount,type});
+    renderKPIs(); renderImpactFeed(); renderCRM(); renderSocial();
+    toast("¡Gracias!","Donación registrada. Revisa tu seguimiento en CRM (demo).");
+    $("#donorMsg").value=""; $("#cardNum").value=""; $("#cardExp").value=""; $("#cardCvv").value="";
+  });
+
+  $("#addDonorBtn").addEventListener("click",()=>{
+    db.activity.unshift({tag:"Reporte",text:"Se añadió un registro (demo)",meta:"Formulario rápido · justo ahora"});
+    renderCRM(); toast("Registro","Se simuló la creación de un nuevo registro en el CRM.");
+  });
+  $("#goDonateFromCRM").addEventListener("click",()=>setView("donar"));
+
+  $("#useTemplate").addEventListener("click",()=>{
+    $("#socialCopy").value="Hoy tu ayuda se convierte en alimento, salud y esperanza. Dona en 1 minuto y recibe seguimiento transparente. #SolidaridadEnAcción";
+    toast("Plantilla aplicada","Edita el mensaje para tu sede y programa la publicación.");
+  });
+  $("#schedulePost").addEventListener("click",()=>{
+    const net=$("#socialNet").value;
+    const goal=$("#socialGoal").value;
+    const copy=$("#socialCopy").value.trim();
+    if(!copy){toast("Falta texto","Escribe el mensaje antes de programar."); return;}
+    const tag=goal==="donar"?"Campaña":(goal==="transparencia"?"Transparencia":"Voluntariado");
+    db.campaigns.unshift({title:`Publicación en ${net}`,desc:copy.slice(0,90)+(copy.length>90?"…":""),tag});
+    $("#socialCopy").value="";
+    renderSocial(); toast("Programada","Publicación programada (demo).");
+  });
+  $("#downloadKit").addEventListener("click",()=>toast("Kit (demo)","En producción: plantillas, tono y protocolos nacionales."));
+  $("#ctaFromSocial").addEventListener("click",()=>{setView("donar"); toast("Ruta completa","RRSS → Donación → CRM: prueba el flujo (demo).");});
+
+  $("#globalSearch").addEventListener("keydown",(e)=>{ if(e.key==="Enter") runSearch(e.target.value); });
+  window.addEventListener("keydown",(e)=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); $("#globalSearch").focus(); }});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const states = document.querySelectorAll('[data-state]');
+  const info = document.getElementById('stateInfo');
+  let active = null;
+
+  function render(stateEl){
+    const name = stateEl.dataset.name;
+    const donated = stateEl.dataset.donated;
+    const donors = stateEl.dataset.donors;
+    const impact = stateEl.dataset.impact;
+    info.innerHTML = `
+      <h3>${name}</h3>
+      <p><strong>Donado:</strong> $${Number(donated).toLocaleString()}</p>
+      <p><strong>Donantes:</strong> ${donors}</p>
+      <p><strong>Impacto estimado:</strong> ${impact}</p>
+      <button class="btn" onclick="document.getElementById('donationState').value='${name}'">Donar a este estado</button>
+    `;
+  }
+
+  states.forEach(el=>{
+    el.addEventListener('mouseenter', ()=>{ el.classList.add('hover'); });
+    el.addEventListener('mouseleave', ()=>{ el.classList.remove('hover'); });
+    el.addEventListener('click', ()=>{
+      if(active) active.classList.remove('active');
+      active = el;
+      el.classList.add('active');
+      render(el);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
